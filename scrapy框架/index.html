@@ -1,0 +1,347 @@
+<!DOCTYPE html><html><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description" content="框架核心部件、持久化存储、分布式搭建、增量式爬虫"><link rel="stylesheet" type="text/css" href="/css/normalize.css"><link rel="stylesheet" type="text/css" href="/css/highlight.css"><link rel="stylesheet" type="text/css" href="/css/noise.css"><title>scrapy框架 | Fatinn</title><link rel="Shortcut Icon" type="image/x-icon" href="/favicon.ico"><script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script><script>(adsbygoogle = window.adsbygoogle || []).push({
+ google_ad_client: "true",
+ enable_page_level_ads: true
+ });
+</script><meta name="generator" content="Hexo 5.4.0"></head><body><article class="wrapper"><div class="post-main"><div class="nav"><nav class="container"><a class="sidebar-nav-item active" href="/">Home</a></nav><div class="container post-meta"><div class="post-time">2021-08-16</div></div></div><div class="container post-header"><h1>scrapy框架</h1></div><div class="container post-toc"><details class="toc"><summary class="toc-accordion">目录</summary><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#scrapy%E6%A1%86%E6%9E%B6"><span class="toc-number">1.</span> <span class="toc-text">scrapy框架</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8C%87%E5%AE%9Aredis%E6%9C%8D%E5%8A%A1%E5%99%A8%EF%BC%9A"><span class="toc-number">1.1.</span> <span class="toc-text">指定redis服务器：</span></a></li></ol></li></ol></details></div><div class="container post-content"><p>框架核心部件、持久化存储、分布式搭建、增量式爬虫</p>
+<h1 id="scrapy框架"><a href="#scrapy框架" class="headerlink" title="scrapy框架"></a>scrapy框架</h1><ul>
+<li><p>什么是框架？</p>
+<ul>
+<li>就是一个集成了很多功能并且具有很强通用性的一个项目模板。</li>
+</ul>
+</li>
+<li><p>如何学习框架？</p>
+<ul>
+<li>专门学习框架封装的各种功能的详细用法。</li>
+</ul>
+</li>
+<li><p>什么是scrapy？</p>
+<ul>
+<li>爬虫中封装好的一个明星框架。功能：高性能的持久化存储，异步的数据下载，高性能的数据解析，分布式</li>
+</ul>
+</li>
+<li><p>scrapy框架的基本使用</p>
+<ul>
+<li>环境的安装：<ul>
+<li>mac or linux : pip install scrapy</li>
+<li>windows’:<ul>
+<li>pip install wheel</li>
+<li>下载twisted</li>
+<li>安装twisted</li>
+<li>pip install pywin32</li>
+<li>pip install scrapy</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>创建一个工程：scrapy startproject xxxPro</li>
+<li>cd xxxPro</li>
+<li>在spiders子目录中创建一个爬虫文件<ul>
+<li>scrapy genspider spiderName <a target="_blank" rel="noopener" href="http://www.xxx.com/">www.xxx.com</a></li>
+</ul>
+</li>
+<li>执行工程：<ul>
+<li>scrapy crawl spiderName（first）</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>scrapy数据解析</p>
+</li>
+<li><p>scrapy持久化存储</p>
+<ul>
+<li><p>基于终端指令：</p>
+<ul>
+<li>要求：只可以将parse方法的返回值存储到本地的文本文件中</li>
+<li>注意：持久化存储对应的文本文件的类型只可以为‘json’，‘csv’</li>
+<li>指令： scrapy scrawl xxx -o filePath</li>
+<li>好处：简洁高效便捷</li>
+<li>缺点：局限性比较强（数据只可以存储到指定后缀的文本文件中）</li>
+</ul>
+</li>
+<li><p>基于管道：</p>
+<ul>
+<li>编码流程：<ul>
+<li>数据解析</li>
+<li>在item类总定义相关属性</li>
+<li>将解析的数据封装存储到item类型的对象</li>
+<li>将item类型的对象提交给管道进行持久化存储的操作</li>
+<li>在管道类的process_item中将其接收到的item对象中存储的数据进行持久化存储操作</li>
+<li>在配置文件中开启管道</li>
+</ul>
+</li>
+<li>好处：<ul>
+<li>通用性强。</li>
+</ul>
+</li>
+<li>缺点：<ul>
+<li>编码繁琐</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>面试题：将爬取的数据一份存储到本地一份存储到数据库，如何实现？</p>
+<ul>
+<li>管道文件中一个管道类对应的是将数据存储到一种平台或者载体中</li>
+<li>爬虫文件提交的item只会给管道文件中第一个被执行的管道类接收</li>
+<li>process_item中的return item表示将item传递给下一个即将被执行的管道类</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>基于Spider的全站数据爬取</p>
+<ul>
+<li>就是将网站中某板块下的全部页码对应的页面数据进行爬取</li>
+<li>需求：爬取全部照片名称</li>
+<li>实现方式：<ul>
+<li>将所有页面的url添加到start_urls列表（不推荐）</li>
+<li>自行手动进行请求发送（推荐）<ul>
+<li>手动请求发送：<ul>
+<li>yield scrapy.Request(url,callback): callback专门用作于数据解析。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>五大核心部件</p>
+<ul>
+<li>引擎(Scrapy):<ul>
+<li>用来处理整个系统的数据流处理，触发事务（框架核心）</li>
+</ul>
+</li>
+<li>调度器(Scheduler):<ul>
+<li>用来接受引擎发过来的请求，压入队列中，并在引擎再次请求的时候返回，可以想象成一个URL（抓取网页的网址或者说是连接）的优先队列，由它来决定下一个要抓取的网址是什么，同时去除重复网址</li>
+</ul>
+</li>
+<li>下载器(Downloader)<ul>
+<li>用于下载网页内容，并将网页内容返回给Spider</li>
+</ul>
+</li>
+<li>爬虫(Spiders)<ul>
+<li>爬虫是主要干活的，用于从特定的万个亿中提取自己需要的信息，即所谓的实体(item)。用户也可以从中提取出连接，让Scrapy继续抓取下一个页面。</li>
+</ul>
+</li>
+<li>项目管道(Pipeline)<br>  负责处理爬虫从网页中抽取的实体，主要功能是持久化实体、验证实体的有效性，清除不需要的信息。当页面被爬虫解析后，将被发送到项目管道，并经过几个特定的次序处理数据。</li>
+</ul>
+</li>
+<li><p>请求传参</p>
+<ul>
+<li>使用场景：如果爬取解析的数据不在同一张页面中。 （深度爬取）</li>
+<li>需求：爬取boss直聘的岗位名称和详情</li>
+</ul>
+</li>
+<li><p>图片数据爬取之ImagesPipeline</p>
+<ul>
+<li>基于scrapy爬取字符串类型的数据和爬取图片类型的数据区别<ul>
+<li>字符串：只需要基于xpath进行解析且提交管道进行持久化存储</li>
+<li>图片：xpath解析出图片src的属性值。单独对图片地址发起请求获取图片二进制类型的数据。</li>
+</ul>
+</li>
+<li>ImagesPipeline：<ul>
+<li>只需要将img的src的属性值进行解析，提交到管道，管道就会对图片的src进行请求发送获取图片的二进制类型的数据，且还会帮我们进行持久化存储。</li>
+</ul>
+</li>
+<li>需求：爬取站长素材中的高清图片</li>
+<li>使用流程：<ul>
+<li>数据解析（图片的地址）</li>
+<li>将存储图片地址的item提交到指定的管道类</li>
+<li>在管道文件中自定制一个给予ImagesPipeLine的一个管道类<ul>
+<li>get_media_request()</li>
+<li>file_path()</li>
+<li>item_completed()</li>
+</ul>
+</li>
+<li>在配置文件中：<ul>
+<li>指定图片存储的目录 ： IMAGES_STORE=’./XXX’</li>
+<li>指定开启的管道：自定制的管道类</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>中间件</p>
+<ul>
+<li>下载中间件<ul>
+<li>位置：引擎和下载器之间</li>
+<li>作用：批量拦截到整个工程中发起的所有的请求和响应</li>
+<li>拦截请求：<ul>
+<li>UA伪装:process_request</li>
+<li>代理IP:process_exception: return request 修正之后</li>
+</ul>
+</li>
+<li>拦截响应：<ul>
+<li>篡改响应数据，响应对象</li>
+<li>需求：爬取网易新闻中的新闻数据（标题和内容）<ul>
+<li>1.通过网易新闻的首页解析出五大板块对应的详情页的url（没有动态加载）</li>
+<li>2.每一个板块对应的新闻标题都是动态加载出来的（动态加载）</li>
+<li>3.通过解析出每一条新闻详情页的url获取详情页的页面源码，解析出新闻内容</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>CrawlSpider：类，Spider的一个子类</p>
+<ul>
+<li>全站数据爬取的方式 <ul>
+<li>基于Spider：手动请求发送</li>
+<li>基于CrawlSpider</li>
+</ul>
+</li>
+<li>CrawlSpider的使用：<ul>
+<li>创建一个工程</li>
+<li>cd xxx</li>
+<li>创建爬虫文件（CrawlSpider）：<ul>
+<li>scrapy genspider -t crawl xxx <a target="_blank" rel="noopener" href="http://www.xxx.com/">www.xxx.com</a></li>
+<li>链接提取器：<ul>
+<li>作用：根据指定的规则（allow）进行指定链接的提取</li>
+</ul>
+</li>
+<li>规则解析器：<ul>
+<li>作用：将链接提取器提取到的链接进行指定规则（callback）的解析</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>#需求：#需求:爬取编号、标题、内容、标号<ul>
+<li>分析：爬取的数据没有在同一张页面中。</li>
+<li>1.可以使用链接提取器提取所有的页码链接</li>
+<li>2.让链接提取器提取所有的新闻详情页的链接  </li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>分布式爬虫</p>
+<ul>
+<li><p>概念：我们需要搭建一个分布式的机群，让其对一组资源进行分布联合爬取。</p>
+</li>
+<li><p>作用：提升爬取数据的效率</p>
+</li>
+<li><p>如何实现分布式？</p>
+<ul>
+<li><p>安装一个scrapy-redis的组件</p>
+</li>
+<li><p>原生的scrapy是不可以实现分布式爬虫，必须要让scrapy结合着scrapy-redis组件一起实现分布式爬虫。</p>
+</li>
+<li><p>为什么原生的scrapy不可以实现分布式</p>
+<ul>
+<li>调度器不可以被分布式机群共享</li>
+<li>管道不可以被分布式机群共享</li>
+</ul>
+</li>
+<li><p>scrapy-redis组件作用：</p>
+<ul>
+<li>可以给原生的scrapy框架提供可以被共享的管道和调度器</li>
+</ul>
+</li>
+<li><p>实现流程</p>
+<ul>
+<li><p>创建一个工程</p>
+</li>
+<li><p>创建一个给予CrawlSpider的爬虫文件</p>
+</li>
+<li><p>修改当前爬虫文件：</p>
+<ul>
+<li>导包：from scrapy_redis.spiders import RedisCrawlSpider</li>
+<li>将allowed_domains和start_urls进行注释</li>
+<li>添加一个新属性：redis_key = ‘sun’可以被共享的调度器队列的名称</li>
+<li>编写数据解析相关操作</li>
+<li>将当前爬虫类的父类修改成RedisCrawlSpider</li>
+</ul>
+</li>
+<li><p>修改配置文件settings：</p>
+<ul>
+<li>指定使用可以被共享的管道：<ul>
+<li>#指定管道<br>ITEM_PIPELINES={<br>  ‘scrapy_redis.pipelines.RedisPipeline’:400<br>}</li>
+</ul>
+</li>
+<li>指定调度器<br>  -#增加一个去重容器类的配置，作用使用Redis的set集合来存储请求的指纹数据，从事实现请求去重的持久化<br>  DUPEFILTER_CLASS=’scrapy_redis.dupefilter.RFPDupeFilter’<br>  #使用scrapy-redis组件自己的调度器<br>  SCHEDULER = “scrapy_redis.scheduler.Scheduler”<br>  #配置调度器是否要持久化，也就是当爬虫结束了，要不要清空Redis中请求队列和去重指纹的set<br>  SCHEDULER_PERSIST = True</li>
+<li><h2 id="指定redis服务器："><a href="#指定redis服务器：" class="headerlink" title="指定redis服务器："></a>指定redis服务器：</h2></li>
+</ul>
+</li>
+<li><p>redis相关操作配置：</p>
+<ul>
+<li>配置redis的配置文件：<ul>
+<li>redis。conf</li>
+<li>打开配置文件修改：<ul>
+<li>将bind 127.0.0.1进行删除</li>
+<li>关闭保护模式 protected-mode yes 改为 no</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>结合着配置文件开启redis服务<ul>
+<li>redis-server redis.windows.conf</li>
+</ul>
+</li>
+<li>启动客户端：<ul>
+<li>redis-cli</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>执行工程：</p>
+<ul>
+<li>scrapy runspider xxx.py</li>
+</ul>
+</li>
+<li><p>向调度器的队列中放入一个起始url：</p>
+<ul>
+<li>调度器的队列在redis的客户端<ul>
+<li>lpsuh xxx <a target="_blank" rel="noopener" href="http://www.xxx.com/">www.xxx.com</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>爬取道德数据存储在了redis的proName：items这个数据结构中</p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li><p>增量式爬虫</p>
+<ul>
+<li><p>概念：检测网站更新的情况，只会爬取网站最新更新出来的数据。</p>
+</li>
+<li><p>分析：</p>
+<ul>
+<li><p>指定一个其实url</p>
+</li>
+<li><p>基于CrawlSpider获取其他页码链接</p>
+</li>
+<li><p>基于Rule将其他页码链接进行请求</p>
+</li>
+<li><p>从每一个页码对应的页面源码中解析出每一个电影详情页的URL</p>
+</li>
+<li><p>核心：检测电影详情页的url之前有没有请求过</p>
+<ul>
+<li>将爬取过的电影详情页的url存储<ul>
+<li>存储到redis的set数据结构中</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>对详情页的url发起请求，然后解析出电影的名称和检测</p>
+</li>
+<li><p>进行持久化存储                </p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div></div><div class="post-main post-comment"></div></article><link rel="stylesheet" type="text/css" href="/css/font.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/font-awesome/4.5.0/css/font-awesome.min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.css"><script src="//cdn.bootcss.com/jquery/2.0.3/jquery.min.js"></script><script src="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.pack.js"></script><script>$(document).ready(function() {
+  $(".fancybox").fancybox();
+});
+</script></body></html>
